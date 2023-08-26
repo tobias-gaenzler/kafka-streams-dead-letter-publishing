@@ -1,0 +1,19 @@
+spring:
+  kafka:
+    streams:
+      application-id: streams-dead-letter
+      bootstrap-servers: localhost:9092
+      properties:
+        default:
+          deserialization:
+            exception:
+              handler: "de.tg.kafka.streams.dead.letter.errorhandling.DeadLetterDeserializationExceptionHandler"
+          production:
+            exception:
+              handler: "de.tg.kafka.streams.dead.letter.errorhandling.DeadLetterProductionExceptionHandler"
+topics:
+  input: "input"
+  output: "output"
+  process-exception: "process-exception.DLT"
+  deserialization-exception: "deserialization-exception.DLT"
+  production-exception: "production-exception.DLT"
