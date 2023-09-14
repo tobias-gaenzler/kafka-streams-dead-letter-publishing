@@ -30,6 +30,7 @@ Kafka Streams has three broad categories of errors:
 We will need to implement dead letter publishing for all three categories, as there is no out of the box support in Kafka Streams.  
 When producing to the dead letter topic fails, the application is stopped by the [StreamsUncaughtExceptionHandler](https://developer.confluent.io/tutorials/error-handling/kstreams.html) to prevent duplicate records.
 
+![Dead Letter Publishing](https://github.com/tobias-gaenzler/kafka-streams-dead-letter-publishing/blob/main/KafkaStreamsDeadLetterPublishing.png?raw=true)
 
 
 Side notes: 
