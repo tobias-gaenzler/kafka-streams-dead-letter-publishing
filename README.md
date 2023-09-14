@@ -260,6 +260,10 @@ and provide the implementation.
 The handler is instantiated by the Kafka Streams framework which makes it difficult to wire dependencies.
 Hence, we have to create the producer to the dead letter topic ourselves.
 ```java
+public class DeadLetterDeserializationExceptionHandler implements DeserializationExceptionHandler {
+    
+    /...
+    
     @Override
     public void configure(Map<String, ?> map) {
         Map<String, Object> props = Map.of(
@@ -269,6 +273,7 @@ Hence, we have to create the producer to the dead letter topic ourselves.
         ProducerFactory<byte[], byte[]> factory = new DefaultKafkaProducerFactory<>(props);
         this.kafkaTemplate = new KafkaTemplate<>(factory);
     }
+}
 ```
 
 Now the handler can send the failing record to the dead letter topic.
