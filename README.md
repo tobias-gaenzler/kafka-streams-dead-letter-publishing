@@ -363,7 +363,9 @@ No automated way of processing records in the dead letter topic is provided and 
 # Thanks
 The completion of this article would not have been possible without the support of:
 
-- Confluent Inc.: Daniel Petisme
-- TODO
+- Confluent Inc.: [Daniel Petisme](https://www.linkedin.com/in/danielpetisme/)
+- Thinkport GmbH: [Thomas Iffland](https://www.linkedin.com/in/thomas-iffland-b417ab1b3/), [Patrick Polster](https://www.linkedin.com/in/patrickpolster/), [Laszlo Csoti](https://www.linkedin.com/in/laszlo-csoti-0a386310b/)
+- PPI AG: [Simon Stratmann](https://www.linkedin.com/in/simon-stratmann/)
+- Körber Pharma: [Philipp Stratmann](https://www.linkedin.com/in/philipp-stratmann-64a1509b/)
 
 Thank you all very much!
