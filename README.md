@@ -173,28 +173,24 @@ class ErrorHandlingTopologyTest {
     void testProcessException() {
         produceRecord(new TestRecord<>("key", -1)); // use TopologyTestDriver to send a message
 
-        assertTrue(outputTopic.isEmpty()); // No message in output topic. The failing message was sent to the dead letter topic.
+        // No message in output topic. The failing message was sent to the dead letter topic.
+        assertTrue(outputTopic.isEmpty());
+        // read message from dead letter topic
         TestRecord<String, Integer> resultRecord = processExceptionTopic.readRecord();
-        assertEquals(-1, resultRecord.value()); // the original message value, which caused the error
-        byte[] headerValue = resultRecord.headers().lastHeader(ErrorMessageMapper.ERROR_MESSAGE_HEADER).value();
-        assertEquals("java.lang.IllegalArgumentException: -1", new String(headerValue, UTF_8)); // error message in header
+        
+        // the original message value, which caused the error
+        assertEquals(-1, resultRecord.value()); 
+        // error message in header
+        byte[] headerValue = resultRecord
+                .headers()
+                .lastHeader(ErrorMessageMapper.ERROR_MESSAGE_HEADER)
+                .value();
+        assertEquals("java.lang.IllegalArgumentException: -1", new String(headerValue, UTF_8));
     }
  
     private void produceRecord(TestRecord<String, Integer> input) {
-        // build the topology
-        StreamsBuilder streamsBuilder = new StreamsBuilder();
-        errorHandlingTopology.buildErrorHandlingTopology(streamsBuilder);
-        topology = streamsBuilder.build();
-        try (TopologyTestDriver testDriver = new TopologyTestDriver(topology);
-             Serde<String> stringSerde = Serdes.String();
-             Serde<Integer> integerSerde = Serdes.Integer()) {
-            // create required topics
-            inputTopic = testDriver.createInputTopic(config.input(), stringSerde.serializer(), integerSerde.serializer());
-            outputTopic = testDriver.createOutputTopic(config.output(), stringSerde.deserializer(), stringSerde.deserializer());
-            processExceptionTopic = testDriver.createOutputTopic(config.processException(), stringSerde.deserializer(), integerSerde.deserializer());
-
-            inputTopic.pipeInput(input); // send message
-        }
+        // build the topology and produce message using the correct Serdes
+        ...
     }
 }
 ```
@@ -210,22 +206,30 @@ class ErrorHandlingTopologyIntegrationTest {
     
     @Test
     void testProcessException() throws ExecutionException, InterruptedException {
-        Consumer<String, Integer> deadLetterConsumer = createConsumer(topicConfig.processException(), IntegerDeserializer.class);
+        Consumer<String, Integer> deadLetterConsumer = 
+                createConsumer(topicConfig.processException(), IntegerDeserializer.class);
 
         produceRecord(-1); // use a real KafkaProducer to send the message
 
+        // read message from dead letter topic
         ConsumerRecord<String, Integer> resultRecord = getSingleRecord(
                 deadLetterConsumer,
                 topicConfig.processException(),
                 ofSeconds(MAX_CONSUMER_WAIT_TIME));
-        assertEquals(-1, resultRecord.value()); // the original message value, which caused the error
-        byte[] headerValue = resultRecord.headers().lastHeader(ErrorMessageMapper.ERROR_MESSAGE_HEADER).value();
-        assertEquals("java.lang.IllegalArgumentException: -1", new String(headerValue, UTF_8)); // error message in header
+        // the original message value, which caused the error
+        assertEquals(-1, resultRecord.value());
+        // error message in header
+        byte[] headerValue = resultRecord
+                .headers()
+                .lastHeader(ErrorMessageMapper.ERROR_MESSAGE_HEADER)
+                .value();
+        assertEquals("java.lang.IllegalArgumentException: -1", new String(headerValue, UTF_8));
     }
 
-    private void produceRecord(int x) throws InterruptedException, ExecutionException {
-        try (KafkaProducer<String, Integer> producer = new KafkaProducer<>(getProducerProperties(IntegerSerializer.class))) {
-            producer.send(new ProducerRecord<>(topicConfig.input(), 0, "key", x)).get();
+    private void produceRecord(int stringLength) throws InterruptedException, ExecutionException {
+        try (KafkaProducer<String, Integer> producer = 
+                     new KafkaProducer<>(getProducerProperties(IntegerSerializer.class))) {
+            producer.send(new ProducerRecord<>(topicConfig.input(), 0, "key", stringLength)).get();
         }
     }
 }
@@ -282,7 +286,11 @@ public class DeadLetterDeserializationExceptionHandler implements Deserializatio
             ConsumerRecord<byte[], byte[]> failingRecord,
             Exception exception) {
         try {
-            ProducerRecord<byte[], byte[]> resultRecord = new ProducerRecord<>("deserialization-exception.DLT", failingRecord.key(), failingRecord.value());
+            ProducerRecord<byte[], byte[]> resultRecord = 
+                    new ProducerRecord<>(
+                            "deserialization-exception.DLT", 
+                            failingRecord.key(), 
+                            failingRecord.value());
             resultRecord.headers().add(ERROR_MESSAGE_HEADER, exception.getMessage().getBytes(UTF_8));
             kafkaTemplate.send(resultRecord);
             return CONTINUE;
@@ -325,7 +333,11 @@ public class DeadLetterProductionExceptionHandler implements ProductionException
             Exception exception) {
         byte[] value = getSaveValue(failingRecord, exception);
         try {
-            ProducerRecord<byte[], byte[]> resultRecord = new ProducerRecord<>("production-exception.DLT", failingRecord.key(), value);
+            ProducerRecord<byte[], byte[]> resultRecord = 
+                    new ProducerRecord<>(
+                            "production-exception.DLT", 
+                            failingRecord.key(), 
+                            value);
             resultRecord.headers().add(ERROR_MESSAGE_HEADER, exception.getMessage().getBytes(UTF_8));
             kafkaTemplate.send(resultRecord);
             return CONTINUE;
