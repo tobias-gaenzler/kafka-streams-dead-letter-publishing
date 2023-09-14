@@ -354,6 +354,7 @@ We have implemented one example of dead letter topic publishing with Spring Kafk
 and provided integrative tests using test containers to show that all scenarios are handled as expected.  
 With this implementation, failing records (caused by deserialization, processing or production errors) can be inspected on a separate topic,  
 with original payload and diagnostic details available in the message headers.
+Source code can be found on github [kafka-streams-dead-letter-publishing](https://github.com/tobias-gaenzler/kafka-streams-dead-letter-publishing)
 
 ### Restrictions:
 Please note, that this example only works for stateless streams and simple topologies.  
