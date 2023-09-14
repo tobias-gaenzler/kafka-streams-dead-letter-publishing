@@ -32,6 +32,9 @@ When producing to the dead letter topic fails, the application is stopped by the
 
 ![Dead Letter Publishing](https://github.com/tobias-gaenzler/kafka-streams-dead-letter-publishing/blob/main/resources/KafkaStreamsDeadLetterPublishing.png?raw=true)
 
+We produce messages of each error category to a separate topic for explanatory purposes.
+Usually, however, only one dead letter topic is used for simplicity. 
+
 
 Side notes: 
 - [Spring Cloud Stream](https://docs.spring.io/spring-cloud-stream-binder-kafka/docs/current/reference/html/spring-cloud-stream-binder-kafka.html#_handling_deserialization_exceptions_in_the_binder) supports dead letter topics for deserialization errors via configuration
